@@ -3,154 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dhenlee AI Song - SunoAPI</title>
+    <title>Dhenlee AI Song</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root { --accent: #d4a373; --bg: #0d0d0d; --card: #1a1614; }
         body { background: var(--bg); color: #e5d3b3; font-family: 'Inter', sans-serif; margin: 0; }
-        
         .content-section { display: none; padding: 25px 20px 120px; max-width: 500px; margin: auto; }
-        .active { display: block; animation: slideUp 0.4s ease-out; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
+        .active { display: block; animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         input, textarea, select { 
             background: #231f1c !important; border: 1px solid #3d332d !important; 
             color: white !important; width: 100%; padding: 12px; border-radius: 12px; outline: none;
-            font-size: 14px;
         }
-        input:focus { border-color: var(--accent) !important; }
-        label { display: block; font-size: 11px; margin-bottom: 6px; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; }
-        
-        /* Animasi Ombak Samping */
-        .wave-bg {
-            position: fixed; top: 0; right: -40px; width: 100px; height: 100%;
-            background: linear-gradient(180deg, transparent, var(--accent), transparent);
-            opacity: 0.08; filter: blur(35px); animation: wave 7s infinite ease-in-out; pointer-events: none;
-        }
-        @keyframes wave { 0%, 100% { transform: translateY(-15%); } 50% { transform: translateY(15%); } }
-
         .bottom-nav {
             position: fixed; bottom: 0; width: 100%; background: rgba(26, 22, 20, 0.95);
             backdrop-filter: blur(10px); display: flex; justify-content: space-around; 
             padding: 15px 0; border-top: 1px solid #2d2621; z-index: 100;
         }
-        .nav-item { cursor: pointer; opacity: 0.4; text-align: center; font-size: 10px; transition: 0.3s; }
-        .nav-item.active { opacity: 1; color: var(--accent); transform: translateY(-2px); }
-        .nav-icon { font-size: 20px; margin-bottom: 4px; }
-
-        .btn-gen {
-            background: linear-gradient(45deg, #d4a373, #b88b5d);
-            box-shadow: 0 4px 15px rgba(212, 163, 115, 0.3);
-        }
+        .nav-item { cursor: pointer; opacity: 0.4; text-align: center; font-size: 10px; }
+        .nav-item.active { opacity: 1; color: var(--accent); }
+        .type-btn { background: #231f1c; border: 1px solid #3d332d; padding: 10px; border-radius: 10px; flex: 1; text-align: center; font-size: 12px; }
+        .type-btn.selected { border-color: var(--accent); color: var(--accent); background: rgba(212, 163, 115, 0.1); }
     </style>
 </head>
 <body>
 
-    <div class="wave-bg"></div>
-
-    <!-- HOME SECTION -->
     <section id="home" class="content-section active">
-        <h1 class="text-3xl font-bold text-[#d4a373] tracking-tight">Dhenlee AI</h1>
-        <p class="opacity-60 text-sm mt-1">SunoAPI Edition v1.0</p>
-        
+        <h1 class="text-3xl font-bold text-[#d4a373]">Dhenlee AI</h1>
         <div id="resultList" class="mt-8 space-y-5">
-            <!-- Koleksi lagu akan muncul di sini -->
-            <div class="text-center py-20 opacity-30">
-                <div class="text-4xl mb-2">📻</div>
-                <p class="text-xs">Belum ada karya musik di sini.</p>
-            </div>
+            <div class="text-center py-20 opacity-30 italic text-sm">Belum ada lagu.</div>
         </div>
     </section>
 
-    <!-- GENERATE SECTION -->
     <section id="generate" class="content-section">
-        <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
-            <span class="text-2xl">🎵</span> Create New Song
-        </h2>
+        <h2 class="text-xl font-bold mb-6">Create Content</h2>
         
-        <div class="space-y-4">
+        <div class="flex gap-2 mb-6">
+            <button onclick="setType('music')" id="btnMusic" class="type-btn selected">🎵 Musik</button>
+            <button onclick="setType('sfx')" id="btnSfx" class="type-btn">🔊 Efek Suara</button>
+        </div>
+
+        <div id="formMusik" class="space-y-4">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="text-lg">🛠️</span>
+                <span class="font-bold text-sm tracking-widest text-[#d4a373]">CUSTOM MODE</span>
+            </div>
+
             <div>
-                <label>Model Version</label>
+                <label class="text-[10px] text-gray-500 font-bold block mb-1">SELECT MODEL</label>
                 <select id="model">
-                    <option value="chirp-v3.5">V3.5 (Best Quality)</option>
-                    <option value="chirp-v4">V4 (Experimental)</option>
-                    <option value="chirp-v3-0">V3.0 (Classic)</option>
+                    <option value="chirp-v5.5">V5.5</option>
+                    <option value="chirp-v5">V5</option>
+                    <option value="chirp-v4.5-plus">V4.5+</option>
+                    <option value="chirp-v4.5">V4.5</option>
+                    <option value="chirp-v4">V4</option>
+                    <option value="chirp-v4.5-all">V4.5 ALL</option>
                 </select>
             </div>
 
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label>Title</label>
-                    <input type="text" id="title" placeholder="Judul lagu...">
-                </div>
-                <div>
-                    <label>Style / Genre</label>
-                    <input type="text" id="style" placeholder="e.g. Koplo, Jazz">
-                </div>
-            </div>
-
-            <div>
-                <label>Lyrics (Optional)</label>
-                <textarea id="lyrics" rows="5" placeholder="Kosongkan jika ingin AI membuat lirik otomatis..."></textarea>
-            </div>
-
-            <div class="flex items-center gap-2 p-3 bg-[#231f1c] rounded-xl border border-[#3d332d]">
-                <input type="checkbox" id="instrumental" style="width: 20px;">
-                <label for="instrumental" class="mb-0">Instrumental Only</label>
-            </div>
-
-            <button onclick="startGenerate()" id="btnGen" class="btn-gen w-full text-black font-extrabold py-4 rounded-2xl mt-4 transition-transform active:scale-95">
-                GENERATE MUSIC
-            </button>
+            <input type="text" id="title" placeholder="Judul Lagu">
+            <input type="text" id="style" placeholder="Gaya / Prompt Style (Contoh: Koplo, Reggae)">
+            <textarea id="lyrics" rows="5" placeholder="Lirik Lagu (Kosongkan jika otomatis)"></textarea>
             
-            <div id="statusBox" class="hidden mt-6 p-5 bg-[#1a1614] rounded-2xl border border-[#d4a373]/30 text-center">
-                <div class="animate-spin mb-3 text-2xl">⏳</div>
-                <p id="statusText" class="text-sm font-medium">Connecting to SunoAPI...</p>
-                <p class="text-[10px] opacity-50 mt-1">Mohon tunggu 1-2 menit, jangan tutup aplikasi.</p>
-            </div>
+            <button onclick="startGenerate('music')" id="btnGenMusic" class="w-full bg-[#d4a373] text-black font-bold py-4 rounded-2xl mt-2">BUAT MUSIK</button>
+        </div>
+
+        <div id="formSfx" class="hidden space-y-4">
+            <p class="text-xs opacity-60">Buat suara seperti ledakan, burung, atau suasana kantor.</p>
+            <textarea id="sfxPrompt" rows="4" placeholder="Contoh: Suara ombak pantai di sore hari dengan kicauan burung..."></textarea>
+            <button onclick="startGenerate('sfx')" id="btnGenSfx" class="w-full bg-blue-500 text-white font-bold py-4 rounded-2xl">BUAT EFEK SUARA</button>
+        </div>
+
+        <div id="statusBox" class="hidden mt-6 p-5 bg-[#1a1614] rounded-2xl border border-[#d4a373]/30 text-center">
+            <p id="statusText" class="text-sm">Menghubungkan ke Suno...</p>
         </div>
     </section>
 
-    <!-- SETTINGS SECTION -->
     <section id="settings" class="content-section">
         <h2 class="text-xl font-bold mb-6">Settings</h2>
-        <div class="space-y-6">
-            <div class="bg-[#1a1614] p-5 rounded-2xl border border-[#3d332d]">
-                <label>Suno API Base URL</label>
-                <input type="text" id="baseUrl" placeholder="https://api.sunoapi.org" class="mb-4">
-                
-                <label>API Key / Token</label>
-                <input type="password" id="apiKey" placeholder="Masukkan token anda...">
-                
-                <button onclick="saveSettings()" class="mt-4 w-full bg-white/5 py-3 rounded-xl text-sm font-bold border border-white/10 hover:bg-white/10">
-                    SAVE CONFIG
-                </button>
-            </div>
-
-            <div class="text-[11px] leading-relaxed opacity-60 px-2">
-                <p class="font-bold text-[#d4a373] mb-1">PENTING:</p>
-                <p>Aplikasi ini menggunakan integrasi <b>sunoapi.org</b>. Pastikan Base URL sudah benar (biasanya alamat Vercel atau domain API Anda).</p>
-            </div>
+        <div class="space-y-4">
+            <input type="text" id="baseUrl" placeholder="Base URL (e.g. https://...)">
+            <input type="password" id="apiKey" placeholder="API Key / Token (Optional)">
+            <button onclick="saveSettings()" class="w-full bg-white/10 py-3 rounded-xl font-bold">SAVE CONFIG</button>
         </div>
     </section>
 
-    <!-- BOTTOM NAV -->
     <nav class="bottom-nav">
-        <div class="nav-item active" onclick="tab('home', this)">
-            <div class="nav-icon">🏠</div>
-            <div>Home</div>
-        </div>
-        <div class="nav-item" onclick="tab('generate', this)">
-            <div class="nav-icon">🎸</div>
-            <div>Generate</div>
-        </div>
-        <div class="nav-item" onclick="tab('settings', this)">
-            <div class="nav-icon">🛠️</div>
-            <div>Settings</div>
-        </div>
+        <div class="nav-item active" onclick="tab('home', this)">🏠<br>Home</div>
+        <div class="nav-item" onclick="tab('generate', this)">🎸<br>Generate</div>
+        <div class="nav-item" onclick="tab('settings', this)">🛠️<br>Settings</div>
     </nav>
 
     <script>
+        let currentType = 'music';
+
         function tab(id, el) {
             document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
@@ -158,141 +104,98 @@
             el.classList.add('active');
         }
 
+        function setType(type) {
+            currentType = type;
+            document.getElementById('formMusik').classList.toggle('hidden', type !== 'music');
+            document.getElementById('formSfx').classList.toggle('hidden', type !== 'sfx');
+            document.getElementById('btnMusic').classList.toggle('selected', type === 'music');
+            document.getElementById('btnSfx').classList.toggle('selected', type === 'sfx');
+        }
+
         function saveSettings() {
-            localStorage.setItem('suno_base_url', document.getElementById('baseUrl').value);
-            localStorage.setItem('suno_key', document.getElementById('apiKey').value);
-            alert('Pengaturan Berhasil Disimpan!');
+            const url = document.getElementById('baseUrl').value.trim();
+            const key = document.getElementById('apiKey').value.trim();
+            localStorage.setItem('suno_url', url.endsWith('/') ? url.slice(0, -1) : url);
+            localStorage.setItem('suno_key', key);
+            alert('Konfigurasi Disimpan!');
         }
 
         window.onload = () => {
-            document.getElementById('baseUrl').value = localStorage.getItem('suno_base_url') || 'https://api.sunoapi.org';
+            document.getElementById('baseUrl').value = localStorage.getItem('suno_url') || '';
             document.getElementById('apiKey').value = localStorage.getItem('suno_key') || '';
         }
 
-        async function startGenerate() {
-            const baseUrl = localStorage.getItem('suno_base_url');
+        async function startGenerate(type) {
+            const baseUrl = localStorage.getItem('suno_url');
             const key = localStorage.getItem('suno_key');
-            
-            if(!baseUrl || !key) return alert('Atur Base URL dan API Key di menu Settings!');
+            if(!baseUrl) return alert('Atur Base URL dulu!');
 
-            const btn = document.getElementById('btnGen');
             const statusBox = document.getElementById('statusBox');
             const statusText = document.getElementById('statusText');
-            
-            const payload = {
-                prompt: document.getElementById('lyrics').value,
-                tags: document.getElementById('style').value,
-                title: document.getElementById('title').value,
-                model: document.getElementById('model').value,
-                make_instrumental: document.getElementById('instrumental').checked,
-                wait_audio: false
-            };
-
-            btn.disabled = true;
-            btn.style.opacity = '0.5';
             statusBox.classList.remove('hidden');
-            statusText.innerText = "Mengirim permintaan...";
+            statusText.innerText = "Suno sedang meracik nada...";
+
+            let payload = {};
+            if(type === 'music') {
+                payload = {
+                    prompt: document.getElementById('lyrics').value,
+                    tags: document.getElementById('style').value,
+                    title: document.getElementById('title').value,
+                    model: document.getElementById('model').value,
+                    make_instrumental: false
+                };
+            } else {
+                payload = { prompt: document.getElementById('sfxPrompt').value, make_sfx: true };
+            }
 
             try {
                 const res = await fetch(`${baseUrl}/api/generate`, {
                     method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${key}`
-                    },
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
                     body: JSON.stringify(payload)
                 });
-                
                 const data = await res.json();
-                // SunoAPI biasanya mengembalikan array berisi objek lagu
-                const taskId = data[0].id || data.id; 
-                
-                if(taskId) {
-                    checkSunoStatus(taskId);
-                } else {
-                    throw new Error('Gagal mendapatkan Task ID');
-                }
+                let tid = Array.isArray(data) ? data[0].id : (data.id || (data.data && data.data[0] ? data.data[0].id : null));
+
+                if(tid) checkStatus(tid);
+                else throw new Error("Gagal mendapatkan Task ID");
             } catch (err) {
-                alert('Error: ' + err.message);
-                btn.disabled = false;
-                btn.style.opacity = '1';
+                alert(err.message);
                 statusBox.classList.add('hidden');
             }
         }
 
-        async function checkSunoStatus(ids) {
-            const baseUrl = localStorage.getItem('suno_base_url');
+        async function checkStatus(id) {
+            const baseUrl = localStorage.getItem('suno_url');
             const key = localStorage.getItem('suno_key');
-            const statusText = document.getElementById('statusText');
-
             const interval = setInterval(async () => {
                 try {
-                    const res = await fetch(`${baseUrl}/api/get?ids=${ids}`, {
+                    const res = await fetch(`${baseUrl}/api/get?ids=${id}`, {
                         headers: { 'Authorization': `Bearer ${key}` }
                     });
                     const data = await res.json();
-                    
-                    // Cek lagu pertama dalam array
-                    const song = data[0]; 
+                    const song = Array.isArray(data) ? data[0] : data;
 
-                    if(song.status === 'complete' || song.audio_url) {
+                    if(song.audio_url) {
                         clearInterval(interval);
-                        displaySong(song);
-                    } else if (song.status === 'error') {
-                        clearInterval(interval);
-                        alert('Terjadi kesalahan pada server Suno.');
-                        resetUI();
-                    } else {
-                        statusText.innerText = "Suno sedang meracik nada... (" + (song.status || 'processing') + ")";
+                        showSong(song);
                     }
-                } catch (e) {
-                    console.log("Polling...");
-                }
-            }, 8000); // Cek setiap 8 detik
+                } catch (e) {}
+            }, 7000);
         }
 
-        function displaySong(song) {
-            const resultList = document.getElementById('resultList');
-            // Hapus pesan kosong jika ada
-            if(resultList.innerHTML.includes('Belum ada karya')) resultList.innerHTML = '';
-
-            const card = `
-                <div class="bg-[#1a1614] p-5 rounded-2xl border border-[#3d332d] shadow-xl">
-                    <div class="flex justify-between items-start mb-4">
-                        <div>
-                            <h4 class="font-bold text-[#d4a373] text-lg">${song.title || 'Untitled Song'}</h4>
-                            <p class="text-[10px] uppercase tracking-widest opacity-50">${song.tags || 'General'}</p>
-                        </div>
-                        <span class="text-[10px] bg-[#d4a373]/10 text-[#d4a373] px-2 py-1 rounded">MP3 Ready</span>
-                    </div>
-                    
-                    <audio controls class="w-full h-10 mb-4 opacity-80">
-                        <source src="${song.audio_url}" type="audio/mpeg">
-                    </audio>
-                    
-                    <div class="grid grid-cols-2 gap-3">
-                        <a href="${song.audio_url}" download target="_blank" class="bg-[#d4a373] text-black text-center py-2.5 rounded-xl text-xs font-bold">
-                            DOWNLOAD MP3
-                        </a>
-                        <button onclick="window.open('${song.video_url || '#'}')" class="border border-[#3d332d] text-white text-center py-2.5 rounded-xl text-xs font-bold">
-                            WATCH VIDEO
-                        </button>
-                    </div>
+        function showSong(s) {
+            const list = document.getElementById('resultList');
+            if(list.innerHTML.includes('Belum ada')) list.innerHTML = '';
+            list.innerHTML = `
+                <div class="bg-[#1a1614] p-5 rounded-2xl border border-[#3d332d]">
+                    <h4 class="font-bold text-[#d4a373] text-sm">${s.title || 'Karya AI'}</h4>
+                    <audio controls class="w-full h-8 my-3"><source src="${s.audio_url}"></audio>
+                    <a href="${s.audio_url}" download target="_blank" class="block bg-[#d4a373] text-black text-center py-2 rounded-xl text-xs font-bold">DOWNLOAD MP3</a>
                 </div>
-            `;
-            
-            resultList.innerHTML = card + resultList.innerHTML;
-            resetUI();
+            ` + list.innerHTML;
+            document.getElementById('statusBox').classList.add('hidden');
             tab('home', document.querySelectorAll('.nav-item')[0]);
-        }
-
-        function resetUI() {
-            const btn = document.getElementById('btnGen');
-            const statusBox = document.getElementById('statusBox');
-            btn.disabled = false;
-            btn.style.opacity = '1';
-            btn.innerText = "GENERATE MUSIC";
-            statusBox.classList.add('hidden');
         }
     </script>
 </body>
