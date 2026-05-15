@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dhenlee AI - Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root { --accent: #d4a373; --bg: #121212; --card: #1e1b18; }
+        body { background: var(--bg); color: #e5d3b3; font-family: sans-serif; }
+        
+        .content-section { display: none; padding: 20px 20px 100px; max-width: 600px; margin: auto; }
+        .active { display: block; animation: fadeIn 0.4s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        input, textarea, select { 
+            background: #2a2420 !important; border: 1px solid #3d332d !important; 
+            color: white !important; width: 100%; padding: 10px; border-radius: 8px; outline: none;
+        }
+        label { display: block; font-size: 12px; margin-bottom: 5px; color: var(--accent); font-weight: bold; }
+        
+        .wave-bg {
+            position: fixed; top: 0; right: -50px; width: 120px; height: 100%;
+            background: linear-gradient(180deg, transparent, var(--accent), transparent);
+            opacity: 0.1; filter: blur(30px); animation: wave 6s infinite ease-in-out; pointer-events: none;
+        }
+        @keyframes wave { 0%, 100% { transform: translateY(-10%); } 50% { transform: translateY(10%); } }
+
+        .bottom-nav {
+            position: fixed; bottom: 0; width: 100%; background: var(--card);
+            display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid #3d332d;
+        }
+        .nav-item { cursor: pointer; opacity: 0.5; text-align: center; font-size: 12px; }
+        .nav-item.active { opacity: 1; color: var(--accent); }
+    </style>
+</head>
+<body>
+
+    <div class="wave-bg"></div>
+
+    <!-- HOME -->
+    <section id="home" class="content-section active">
+        <h1 class="text-3xl font-bold text-[#d4a373]">Dhenlee AI Song</h1>
+        <p class="opacity-70 mt-2">Ubah teks menjadi musik nyata dalam hitungan menit.</p>
+        
+        <div id="resultList" class="mt-6 space-y-4">
+            <!-- Hasil Lagu akan muncul di sini -->
+            <p class="text-xs italic opacity-50 text-center">Belum ada riwayat lagu.</p>
+        </div>
+    </section>
+
+    <!-- GENERATE -->
+    <section id="generate" class="content-section">
+        <h2 class="text-xl font-bold mb-4">Generator Panel</h2>
+        
+        <div class="grid grid-cols-2 gap-3 mb-4">
+            <div>
+                <label>Model AI</label>
+                <select id="model">
+                    <option value="V5_5">V5.5 (Terbaru)</option>
+                    <option value="V5">V5</option>
+                    <option value="V4_SPLUS">V4 SPLUS</option>
+                    <option value="V_45">V4.5</option>
+                </select>
+            </div>
+            <div>
+                <label>Vocal</label>
+                <select id="vocal">
+                    <option value="Male">Male (Pria)</option>
+                    <option value="Female">Female (Wanita)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <label>Judul Lagu</label>
+            <input type="text" id="title" placeholder="Masukkan judul...">
+        </div>
+
+        <div class="mb-4">
+            <label>Prompt Style (Genre)</label>
+            <input type="text" id="style" placeholder="Contoh: Dangdut Koplo, Reggae, Slow Pop...">
+        </div>
+
+        <div class="mb-4">
+            <label>Lirik</label>
+            <textarea id="lyrics" rows="5" placeholder="Tulis lirik di sini..."></textarea>
+        </div>
+
+        <button onclick="startGenerate()" id="btnGen" class="w-full bg-[#d4a373] text-black font-bold py-3 rounded-xl">GENERATE SEKARANG</button>
+        
+        <div id="statusBox" class="hidden mt-4 p-4 bg-[#2a2420] rounded-lg border border-[#d4a373]">
+            <p id="statusText" class="text-sm text-center">Menunggu antrean...</p>
+            <div class="w-full bg-gray-700 h-1 mt-2 rounded-full overflow-hidden">
+                <div id="progressBar" class="bg-[#d4a373] h-full" style="width: 10%;"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="settings" class="content-section">
+        <h2 class="text-xl font-bold mb-4 text-[#d4a373]">API Configuration</h2>
+        <div class="bg-[#1e1b18] p-4 rounded-lg border border-[#3d332d]">
+            <label>KIE AI API KEY</label>
+            <input type="password" id="apiKey" placeholder="Input key kiew.ai...">
+            <button onclick="saveKey()" class="mt-3 w-full bg-white/10 py-2 rounded text-sm">Simpan Konfigurasi</button>
+        </div>
+    </section>
+
+    <!-- NAV -->
+    <nav class="bottom-nav">
+        <div class="nav-item active" onclick="tab('home', this)"><div></div>Home</div>
+        <div class="nav-item" onclick="tab('generate', this)"><div></div>Generate</div>
+        <div class="nav-item" onclick="tab('settings', this)"><div></div>Settings</div>
+    </nav>
+
+    <script>
+        function tab(id, el) {
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        function saveKey() {
+            localStorage.setItem('kie_key', document.getElementById('apiKey').value);
+            alert('Key disimpan!');
+        }
+
+        window.onload = () => {
+            document.getElementById('apiKey').value = localStorage.getItem('kie_key') || '';
+        }
+
+        async function startGenerate() {
+            const key = localStorage.getItem('kie_key');
+            if(!key) return alert('Isi API Key dulu di menu Settings!');
+
+            const btn = document.getElementById('btnGen');
+            const statusBox = document.getElementById('statusBox');
+            const statusText = document.getElementById('statusText');
+            
+            const payload = {
+                model: document.getElementById('model').value,
+                vocal: document.getElementById('vocal').value,
+                title: document.getElementById('title').value,
+                style: document.getElementById('style').value,
+                lyrics: document.getElementById('lyrics').value,
+                customMode: true
+            };
+
+            btn.disabled = true;
+            btn.innerText = "Memproses...";
+            statusBox.classList.remove('hidden');
+
+            try {
+                const res = await fetch('https://api.kie.ai/api/v1/generate', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                
+                if(data.taskId) {
+                    checkStatus(data.taskId);
+                } else {
+                    throw new Error(data.message || 'Gagal membuat Task');
+                }
+            } catch (err) {
+                alert(err.message);
+                btn.disabled = false;
+                statusBox.classList.add('hidden');
+            }
+        }
+
+        async function checkStatus(taskId) {
+            const key = localStorage.getItem('kie_key');
+            const statusText = document.getElementById('statusText');
+            const progress = document.getElementById('progressBar');
+
+            const interval = setInterval(async () => {
+                try {
+                    const res = await fetch(`https://api.kie.ai/api/v1/generate/record-info?taskId=${taskId}`, {
+                        headers: { 'Authorization': `Bearer ${key}` }
+                    });
+                    const data = await res.json();
+
+                    if(data.status === 'completed') {
+                        clearInterval(interval);
+                        finishSong(data);
+                    } else {
+                        statusText.innerText = "Lagu sedang dibuat... (1-2 menit)";
+                        progress.style.width = "60%";
+                    }
+                } catch (e) {
+                    console.log("Cek status...");
+                }
+            }, 10000); // Cek setiap 10 detik
+        }
+
+        function finishSong(data) {
+            const resultList = document.getElementById('resultList');
+            const btn = document.getElementById('btnGen');
+            const statusBox = document.getElementById('statusBox');
+
+            const html = `
+                <div class="bg-[#2a2420] p-4 rounded-xl border-l-4 border-[#d4a373] animate-bounce-short">
+                    <h4 class="font-bold text-[#d4a373]">${data.title || 'Tanpa Judul'}</h4>
+                    <p class="text-[10px] opacity-60 mb-2">${data.style}</p>
+                    <audio controls class="w-full h-8 mb-3">
+                        <source src="${data.audioUrl}" type="audio/mpeg">
+                    </audio>
+                    <div class="flex gap-2">
+                        <a href="${data.audioUrl}" download target="_blank" class="flex-1 bg-[#d4a373] text-black text-center py-2 rounded text-xs font-bold">UNDUH MP3</a>
+                        <a href="${data.videoUrl}" target="_blank" class="flex-1 border border-[#d4a373] text-[#d4a373] text-center py-2 rounded text-xs">LIHAT VIDEO</a>
+                    </div>
+                </div>
+            `;
+            
+            resultList.innerHTML = html + resultList.innerHTML;
+            btn.disabled = false;
+            btn.innerText = "GENERATE SEKARANG";
+            statusBox.classList.add('hidden');
+            tab('home', document.querySelectorAll('.nav-item')[0]);
+            alert('Lagu Selesai Dibuat!');
+        }
+    </script>
+</body>
+</html>
